@@ -1,6 +1,14 @@
-import { Generation } from 'stability-client';
+import { Generation } from './types';
 
 const BASE_URL = 'https://api.stability.ai/v1';
+
+interface Generation {
+  artifacts: Array<{
+    base64: string;
+    seed: number;
+    finishReason: string;
+  }>;
+}
 
 export const PFP_CATEGORIES = {
   characterBase: {

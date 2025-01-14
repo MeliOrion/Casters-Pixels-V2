@@ -32,7 +32,7 @@ export function StatusUpdates({ updates }: StatusUpdatesProps) {
     <div className="space-y-2">
       {visibleUpdates.map((update, index) => (
         <div
-          key={update.timestamp}
+          key={update.timestamp || index}
           className={`p-3 rounded-lg text-white ${getStatusColor(update.type)} 
             transition-all duration-300 ease-in-out`}
           style={{
@@ -40,9 +40,9 @@ export function StatusUpdates({ updates }: StatusUpdatesProps) {
             transform: `scale(${1 - (visibleUpdates.length - 1 - index) * 0.02})`
           }}
         >
-          <p className="font-medium">{update.message}</p>
+          <p className="font-medium">{update.message || 'Status Update'}</p>
           <p className="text-xs opacity-75">
-            {new Date(update.timestamp).toLocaleTimeString()}
+            {update.timestamp ? new Date(update.timestamp).toLocaleTimeString() : ''}
           </p>
         </div>
       ))}

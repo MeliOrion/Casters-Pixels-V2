@@ -8,6 +8,8 @@ export type StatusUpdate = {
   blockNumber?: number;
   reward?: bigint;
   prizePool?: bigint;
+  timestamp?: number;
+  message?: string;
 };
 
 export function useContractEvents(
@@ -16,15 +18,25 @@ export function useContractEvents(
   onStatus?: (update: StatusUpdate) => void
 ) {
   const handleGenerationRequested = useCallback(
-    (user: string, blockNumber: bigint) => {
+    (
+      logs: {
+        args: {
+          user: string;
+          blockNumber: bigint;
+        };
+      }[]
+    ) => {
+      const { user, blockNumber } = logs[0].args;
       if (userAddress && user.toLowerCase() !== userAddress.toLowerCase()) return;
       onStatus?.({
         type: 'request',
         address: user,
         blockNumber: Number(blockNumber),
+        timestamp: Date.now(),
+        message: `Generation requested by ${user.slice(0, 6)}...${user.slice(-4)}`
       });
     },
-    [onStatus, userAddress]
+    [userAddress, onStatus]
   );
 
   useContractEvent({
@@ -35,15 +47,28 @@ export function useContractEvents(
   });
 
   const handleGenerationComplete = useCallback(
-    (user: string, isLegendary: boolean, reward: bigint) => {
+    (
+      logs: {
+        args: {
+          user: string;
+          isLegendary: boolean;
+          reward: bigint;
+        };
+      }[]
+    ) => {
+      const { user, isLegendary, reward } = logs[0].args;
       if (userAddress && user.toLowerCase() !== userAddress.toLowerCase()) return;
       onStatus?.({
         type: isLegendary ? 'legendary' : 'complete',
         address: user,
         reward,
+        timestamp: Date.now(),
+        message: isLegendary 
+          ? `🎉 Legendary NFT generated! Reward: ${reward.toString()} CASTER`
+          : `Generation complete! Reward: ${reward.toString()} CASTER`
       });
     },
-    [onStatus, userAddress]
+    [userAddress, onStatus]
   );
 
   useContractEvent({
@@ -54,10 +79,19 @@ export function useContractEvents(
   });
 
   const handlePrizePoolUpdated = useCallback(
-    (newAmount: bigint) => {
+    (
+      logs: {
+        args: {
+          newAmount: bigint;
+        };
+      }[]
+    ) => {
+      const { newAmount } = logs[0].args;
       onStatus?.({
         type: 'prizepool',
         prizePool: newAmount,
+        timestamp: Date.now(),
+        message: `Prize pool updated: ${newAmount.toString()} CASTER`
       });
     },
     [onStatus]
